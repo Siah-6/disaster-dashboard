@@ -14,6 +14,7 @@ const COLORS = ["#22c55e", "#ef4444"];
 function App() {
   const [grouped, setGrouped] = useState({});
   const [loading, setLoading] = useState(true);
+  const [lastUpdated, setLastUpdated] = useState(null);
 
   useEffect(() => {
     async function fetchData() {
@@ -52,6 +53,7 @@ function App() {
         });
 
         setGrouped(result);
+        setLastUpdated(new Date());
       } catch (err) {
         console.error(err);
       } finally {
@@ -60,13 +62,20 @@ function App() {
     }
 
     fetchData();
+    const interval = setInterval(fetchData, 5000);
+
+    return () => clearInterval(interval);
   }, []);
 
   if (loading) return <h1>Loading...</h1>;
 
   return (
     <div style={styles.page}>
-      <h1 style={styles.title}>Disaster Simulation Dashboard</h1>
+      <div style={styles.container}>
+        <h1 style={styles.title}>Disaster Simulation Dashboard</h1>
+        <p style={{ textAlign: "center", opacity: 0.7, marginBottom: "24px" }}>
+          Last updated: {lastUpdated ? lastUpdated.toLocaleTimeString() : "—"}
+        </p>
 
       {Object.entries(grouped).map(([location, disasters]) => (
         <div key={location} style={styles.section}>
@@ -78,13 +87,15 @@ function App() {
 
               return (
                 <div key={disaster} style={styles.card}>
-                  <h3>{disaster}</h3>
+                  <h3 style={{ fontSize: "18px", fontWeight: "800", marginBottom: "16px" }}>
+                    {disaster}
+                  </h3>
 
                   {total === 0 ? (
                     <p>No available data</p>
                   ) : (
                     <>
-                      <div style={{ width: "100%", height: 200 }}>
+                      <div style={{ width: "100%", height: 220, display: "flex", justifyContent: "center" }}>
                         <ResponsiveContainer>
                           <PieChart>
                             <Pie
@@ -93,7 +104,7 @@ function App() {
                                 { name: "Incorrect", value: stats.incorrect },
                               ]}
                               dataKey="value"
-                              outerRadius={60}
+                              outerRadius={70}
                             >
                               {[
                                 { name: "Correct", value: stats.correct },
@@ -120,6 +131,7 @@ function App() {
           </div>
         </div>
       ))}
+      </div>
     </div>
   );
 }
@@ -132,31 +144,44 @@ const styles = {
     color: "#fff",
     fontFamily: "Arial, sans-serif",
   },
+  container: {
+    maxWidth: "1200px",
+    margin: "0 auto",
+  },
   title: {
     textAlign: "center",
-    marginBottom: "32px",
+    marginBottom: "40px",
+    fontSize: "56px",
+    fontWeight: "800",
+    letterSpacing: "-1px",
   },
   section: {
-    marginBottom: "32px",
+    marginBottom: "40px",
   },
   sectionTitle: {
-    marginBottom: "16px",
+    marginBottom: "18px",
     textAlign: "center",
+    fontSize: "22px",
+    fontWeight: "700",
   },
   cardContainer: {
     display: "flex",
-    gap: "16px",
+    gap: "24px",
     flexWrap: "wrap",
     justifyContent: "center",
   },
   card: {
     backgroundColor: "#1e293b",
-    borderRadius: "12px",
-    padding: "16px",
-    minWidth: "200px",
-    minHeight: "300px",
-    boxShadow: "0 2px 8px rgba(0,0,0,0.3)",
+    borderRadius: "16px",
+    padding: "20px 18px",
+    width: "220px",
+    minHeight: "320px",
+    boxShadow: "0 6px 18px rgba(0,0,0,0.25)",
     textAlign: "center",
+    display: "flex",
+    flexDirection: "column",
+    alignItems: "center",
+    justifyContent: "flex-start",
   },
 };
 
