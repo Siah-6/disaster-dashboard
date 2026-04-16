@@ -86,16 +86,37 @@ function App() {
               const total = stats.correct + stats.incorrect;
 
               return (
-                <div key={disaster} style={styles.card}>
+                <div
+                  key={disaster}
+                  style={styles.card}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.transform = "scale(1.04)";
+                    e.currentTarget.style.boxShadow = "0 10px 30px rgba(0,0,0,0.4)";
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.transform = "scale(1)";
+                    e.currentTarget.style.boxShadow = "0 6px 18px rgba(0,0,0,0.25)";
+                  }}
+                >
                   <h3 style={{ fontSize: "18px", fontWeight: "800", marginBottom: "16px" }}>
                     {disaster}
                   </h3>
 
                   {total === 0 ? (
-                    <p>No available data</p>
+                    <p style={{ opacity: 0.5, fontStyle: "italic" }}>
+                      No data available
+                    </p>
                   ) : (
                     <>
-                      <div style={{ width: "100%", height: 220, display: "flex", justifyContent: "center" }}>
+                      <div
+                        style={{
+                          width: "100%",
+                          height: 220,
+                          display: "flex",
+                          justifyContent: "center",
+                          position: "relative",
+                        }}
+                      >
                         <ResponsiveContainer>
                           <PieChart>
                             <Pie
@@ -105,6 +126,8 @@ function App() {
                               ]}
                               dataKey="value"
                               outerRadius={70}
+                              innerRadius={45}
+                              labelLine={false}
                             >
                               {[
                                 { name: "Correct", value: stats.correct },
@@ -116,6 +139,21 @@ function App() {
                             <Tooltip />
                           </PieChart>
                         </ResponsiveContainer>
+
+                        <div
+                          style={{
+                            position: "absolute",
+                            top: "50%",
+                            left: "50%",
+                            transform: "translate(-50%, -50%)",
+                            color: "#fff",
+                            fontSize: "18px",
+                            fontWeight: "700",
+                            pointerEvents: "none",
+                          }}
+                        >
+                          {Math.round((stats.correct / total) * 100)}%
+                        </div>
                       </div>
 
                       <div style={{ marginTop: "8px", fontSize: "14px", lineHeight: "1.6" }}>
@@ -140,7 +178,7 @@ const styles = {
   page: {
     minHeight: "100vh",
     padding: "32px",
-    backgroundColor: "#0f172a",
+    background: "linear-gradient(135deg, #0f172a, #020617)",
     color: "#fff",
     fontFamily: "Arial, sans-serif",
   },
@@ -156,7 +194,9 @@ const styles = {
     letterSpacing: "-1px",
   },
   section: {
-    marginBottom: "40px",
+    marginBottom: "50px",
+    borderBottom: "1px solid rgba(255,255,255,0.05)",
+    paddingBottom: "20px",
   },
   sectionTitle: {
     marginBottom: "18px",
@@ -172,6 +212,7 @@ const styles = {
   },
   card: {
     backgroundColor: "#1e293b",
+    border: "1px solid rgba(255,255,255,0.05)",
     borderRadius: "16px",
     padding: "20px 18px",
     width: "220px",
@@ -182,7 +223,9 @@ const styles = {
     flexDirection: "column",
     alignItems: "center",
     justifyContent: "flex-start",
+    transition: "all 0.2s ease",
+    cursor: "pointer",
   },
 };
 
-export default App;
+export default App; 
