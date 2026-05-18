@@ -53,6 +53,7 @@ export default function Dashboard() {
             result[location][disaster] = {
               correct: 0,
               incorrect: 0,
+              reactionTimes: [],
             };
           });
         });
@@ -67,6 +68,11 @@ export default function Dashboard() {
             result[location][disaster].correct += 1;
           } else {
             result[location][disaster].incorrect += 1;
+          }
+
+          const reactionTime = d.reactionTime;
+          if (typeof reactionTime === "number" && reactionTime > 0) {
+            result[location][disaster].reactionTimes.push(reactionTime);
           }
         });
 
@@ -141,6 +147,13 @@ export default function Dashboard() {
         const total = stats.correct + stats.incorrect;
         const accuracyPct = total ? Math.round((stats.correct / total) * 100) : 0;
         const errorPct = total ? Math.round((stats.incorrect / total) * 100) : 0;
+        const validReactionTimes = Array.isArray(stats.reactionTimes)
+          ? stats.reactionTimes.filter((rt) => typeof rt === "number" && rt > 0)
+          : [];
+        const averageReactionTime = validReactionTimes.length
+          ? validReactionTimes.reduce((sum, rt) => sum + rt, 0) / validReactionTimes.length
+          : null;
+
         return {
           location,
           disaster,
@@ -150,6 +163,7 @@ export default function Dashboard() {
           accuracy: total ? stats.correct / total : 0,
           accuracyPct,
           errorPct,
+          averageReactionTime,
         };
       })
       .filter((sim) => sim.total > 0)
@@ -363,6 +377,12 @@ export default function Dashboard() {
           >
             {Object.entries(disasters).map(([disaster, stats]) => {
               const total = stats.correct + stats.incorrect;
+              const validReactionTimes = Array.isArray(stats.reactionTimes)
+                ? stats.reactionTimes.filter((rt) => typeof rt === "number" && rt > 0)
+                : [];
+              const averageReactionTime = validReactionTimes.length
+                ? validReactionTimes.reduce((sum, rt) => sum + rt, 0) / validReactionTimes.length
+                : null;
 
               return (
                 <div
@@ -457,6 +477,9 @@ export default function Dashboard() {
                           Incorrect: {stats.incorrect}
                         </p>
                         <p>Total: {total}</p>
+                        <p>
+                          Avg. Reaction Time: {averageReactionTime != null ? `${averageReactionTime.toFixed(2)}s` : "N/A"}
+                        </p>
                       </div>
                     </>
                   )}
