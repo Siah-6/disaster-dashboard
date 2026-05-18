@@ -35,6 +35,8 @@ export default function Dashboard() {
   const [grouped, setGrouped] = useState({});
   const [loading, setLoading] = useState(true);
   const [lastUpdated, setLastUpdated] = useState(null);
+  const [assessmentBreakdown, setAssessmentBreakdown] = useState([]);
+  const [breakdownLoading, setBreakdownLoading] = useState(true);
 
   useEffect(() => {
     async function fetchData() {
@@ -83,10 +85,62 @@ export default function Dashboard() {
     return () => clearInterval(interval);
   }, []);
 
+  useEffect(() => {
+    async function fetchAssessmentBreakdown() {
+      try {
+        const res = await fetch(`${API_BASE_URL}/api/assessments`);
+        const data = await res.json();
+        const answers = Array.isArray(data.answers) ? data.answers : [];
+
+        const breakdownRows = answers
+          .map((item) => {
+            const username = item.username;
+            const prePercentage = item.preAssessment?.percentage;
+            const postPercentage = item.postAssessment?.percentage;
+            const rawChange = item.percentageDifference;
+            const changePercentage = typeof rawChange === "number"
+              ? rawChange
+              : typeof prePercentage === "number" && typeof postPercentage === "number"
+              ? postPercentage - prePercentage
+              : null;
+
+            if (
+              !username ||
+              typeof prePercentage !== "number" ||
+              typeof postPercentage !== "number"
+            ) {
+              return null;
+            }
+
+            return {
+              username,
+              prePercentage: Number(prePercentage),
+              postPercentage: Number(postPercentage),
+              changePercentage: changePercentage == null
+                ? null
+                : Math.round(changePercentage * 100) / 100,
+            };
+          })
+          .filter((row) => row && row.changePercentage != null);
+
+        setAssessmentBreakdown(breakdownRows);
+      } catch (err) {
+        console.error(err);
+        setAssessmentBreakdown([]);
+      } finally {
+        setBreakdownLoading(false);
+      }
+    }
+
+    fetchAssessmentBreakdown();
+  }, []);
+
   const simulations = Object.entries(grouped).flatMap(([location, disasters]) =>
     Object.entries(disasters)
       .map(([disaster, stats]) => {
         const total = stats.correct + stats.incorrect;
+        const accuracyPct = total ? Math.round((stats.correct / total) * 100) : 0;
+        const errorPct = total ? Math.round((stats.incorrect / total) * 100) : 0;
         return {
           location,
           disaster,
@@ -94,6 +148,8 @@ export default function Dashboard() {
           incorrect: stats.incorrect,
           total,
           accuracy: total ? stats.correct / total : 0,
+          accuracyPct,
+          errorPct,
         };
       })
       .filter((sim) => sim.total > 0)
@@ -107,11 +163,11 @@ export default function Dashboard() {
     : 0;
 
   const topErrorSimulations = [...simulations]
-    .sort((a, b) => b.incorrect - a.incorrect)
+    .sort((a, b) => b.errorPct - a.errorPct)
     .slice(0, 5);
 
   const topCorrectSimulations = [...simulations]
-    .sort((a, b) => b.correct - a.correct)
+    .sort((a, b) => b.accuracyPct - a.accuracyPct)
     .slice(0, 5);
 
   if (loading) return <h1 style={{ textAlign: "center" }}>Loading...</h1>;
@@ -165,7 +221,7 @@ export default function Dashboard() {
           {topErrorSimulations.length === 0 ? (
             <p style={{ opacity: 0.75 }}>No simulations with errors yet.</p>
           ) : (
-            topErrorSimulations.map((sim) => (
+            topErrorSimulations.map((sim, index) => (
               <div
                 key={`${sim.location}-${sim.disaster}`}
                 style={{
@@ -176,17 +232,24 @@ export default function Dashboard() {
                   gap: "12px",
                 }}
               >
-                <div>
-                  <p style={{ margin: 0, fontWeight: 700 }}>
-                    {sim.location} / {sim.disaster}
-                  </p>
-                  <p style={{ margin: "6px 0 0", opacity: 0.75, fontSize: "14px" }}>
-                    Incorrect: {sim.incorrect} • Total: {sim.total}
-                  </p>
+                <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
+                  <div style={{ width: "48px", flexShrink: 0, textAlign: "left" }}>
+                    <span style={{ fontSize: "18px", fontWeight: 800, color: "#fff", opacity: 0.95 }}>
+                      #{index + 1}
+                    </span>
+                  </div>
+                  <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-start", textAlign: "left" }}>
+                    <p style={{ margin: 0, fontWeight: 700 }}>
+                      {sim.location} / {sim.disaster}
+                    </p>
+                    <p style={{ margin: "6px 0 0", opacity: 0.75, fontSize: "14px" }}>
+                      Incorrect: {sim.incorrect} • Total: {sim.total}
+                    </p>
+                  </div>
                 </div>
-                <span style={{ fontSize: "20px", fontWeight: 700, color: "#ef4444" }}>
-                  {sim.incorrect}
-                </span>
+                <div style={{ minWidth: "70px", textAlign: "right" }}>
+                  <div style={{ fontSize: "24px", fontWeight: 800, color: "#ef4444" }}>{sim.errorPct}%</div>
+                </div>
               </div>
             ))
           )}
@@ -199,7 +262,7 @@ export default function Dashboard() {
           {topCorrectSimulations.length === 0 ? (
             <p style={{ opacity: 0.75 }}>No correct simulation data yet.</p>
           ) : (
-            topCorrectSimulations.map((sim) => (
+            topCorrectSimulations.map((sim, index) => (
               <div
                 key={`${sim.location}-${sim.disaster}`}
                 style={{
@@ -210,17 +273,74 @@ export default function Dashboard() {
                   gap: "12px",
                 }}
               >
+                <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
+                  <div style={{ width: "48px", flexShrink: 0, textAlign: "left" }}>
+                    <span style={{ fontSize: "18px", fontWeight: 800, color: "#fff", opacity: 0.95 }}>
+                      #{index + 1}
+                    </span>
+                  </div>
+                  <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-start", textAlign: "left" }}>
+                    <p style={{ margin: 0, fontWeight: 700 }}>
+                      {sim.location} / {sim.disaster}
+                    </p>
+                    <p style={{ margin: "6px 0 0", opacity: 0.75, fontSize: "14px" }}>
+                      Correct: {sim.correct} • Total: {sim.total}
+                    </p>
+                  </div>
+                </div>
+                <div style={{ minWidth: "70px", textAlign: "right" }}>
+                  <div style={{ fontSize: "24px", fontWeight: 800, color: "#22c55e" }}>{sim.accuracyPct}%</div>
+                </div>
+              </div>
+            ))
+          )}
+        </div>
+      </div>
+
+      <div style={pageStyles.section}>
+        <h2 style={pageStyles.sectionTitle}>Assessment Breakdown</h2>
+        <div style={{ display: "grid", gap: "12px" }}>
+          {breakdownLoading ? (
+            <p style={{ opacity: 0.75 }}>Loading assessment breakdown...</p>
+          ) : assessmentBreakdown.length === 0 ? (
+            <p style={{ opacity: 0.75 }}>
+              No assessment breakdown available for users with both pre and post results.
+            </p>
+          ) : (
+            assessmentBreakdown.map((row) => (
+              <div
+                key={row.username}
+                style={{
+                  ...pageStyles.card,
+                  display: "flex",
+                  justifyContent: "space-between",
+                  alignItems: "center",
+                  gap: "12px",
+                }}
+              >
                 <div>
-                  <p style={{ margin: 0, fontWeight: 700 }}>
-                    {sim.location} / {sim.disaster}
-                  </p>
-                  <p style={{ margin: "6px 0 0", opacity: 0.75, fontSize: "14px" }}>
-                    Correct: {sim.correct} • Total: {sim.total}
+                  <p style={{ margin: 0, fontWeight: 700 }}>{row.username}</p>
+                  <p style={{ margin: "8px 0 0", opacity: 0.75, fontSize: "14px" }}>
+                    Pre: {row.prePercentage}% • Post: {row.postPercentage}%
                   </p>
                 </div>
-                <span style={{ fontSize: "20px", fontWeight: 700, color: "#22c55e" }}>
-                  {sim.correct}
-                </span>
+                <div style={{ minWidth: "70px", textAlign: "right" }}>
+                  <div
+                    style={{
+                      fontSize: "24px",
+                      fontWeight: 800,
+                      color:
+                        row.changePercentage > 0
+                          ? "#22c55e"
+                          : row.changePercentage < 0
+                          ? "#ef4444"
+                          : "#fff",
+                    }}
+                  >
+                    {row.changePercentage > 0 ? "+" : ""}
+                    {row.changePercentage}%
+                  </div>
+                </div>
               </div>
             ))
           )}
