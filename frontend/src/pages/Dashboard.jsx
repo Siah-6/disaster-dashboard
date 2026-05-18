@@ -35,8 +35,12 @@ export default function Dashboard() {
   const [grouped, setGrouped] = useState({});
   const [loading, setLoading] = useState(true);
   const [lastUpdated, setLastUpdated] = useState(null);
-  const [assessmentBreakdown, setAssessmentBreakdown] = useState([]);
+  const [assessmentBreakdown, setAssessmentBreakdown] = useState({
+    rows: [],
+    summary: null,
+  });
   const [breakdownLoading, setBreakdownLoading] = useState(true);
+  const [showIndividualBreakdown, setShowIndividualBreakdown] = useState(false);
 
   useEffect(() => {
     async function fetchData() {
@@ -129,10 +133,33 @@ export default function Dashboard() {
           })
           .filter((row) => row && row.changePercentage != null);
 
-        setAssessmentBreakdown(breakdownRows);
+        const summary = breakdownRows.length
+          ? {
+              averagePrePercentage:
+                Math.round(
+                  (breakdownRows.reduce((sum, row) => sum + row.prePercentage, 0) /
+                    breakdownRows.length) *
+                    100
+                ) / 100,
+              averagePostPercentage:
+                Math.round(
+                  (breakdownRows.reduce((sum, row) => sum + row.postPercentage, 0) /
+                    breakdownRows.length) *
+                    100
+                ) / 100,
+              averageChangePercentage:
+                Math.round(
+                  (breakdownRows.reduce((sum, row) => sum + row.changePercentage, 0) /
+                    breakdownRows.length) *
+                    100
+                ) / 100,
+            }
+          : null;
+
+        setAssessmentBreakdown({ rows: breakdownRows, summary });
       } catch (err) {
         console.error(err);
-        setAssessmentBreakdown([]);
+        setAssessmentBreakdown({ rows: [], summary: null });
       } finally {
         setBreakdownLoading(false);
       }
@@ -313,50 +340,106 @@ export default function Dashboard() {
 
       <div style={pageStyles.section}>
         <h2 style={pageStyles.sectionTitle}>Assessment Breakdown</h2>
-        <div style={{ display: "grid", gap: "12px" }}>
+        <div style={{ display: "grid", gap: "16px" }}>
           {breakdownLoading ? (
             <p style={{ opacity: 0.75 }}>Loading assessment breakdown...</p>
-          ) : assessmentBreakdown.length === 0 ? (
-            <p style={{ opacity: 0.75 }}>
-              No assessment breakdown available for users with both pre and post results.
-            </p>
           ) : (
-            assessmentBreakdown.map((row) => (
+            <>
               <div
-                key={row.username}
                 style={{
                   ...pageStyles.card,
-                  display: "flex",
-                  justifyContent: "space-between",
-                  alignItems: "center",
-                  gap: "12px",
+                  display: "grid",
+                  gap: "16px",
+                  gridTemplateColumns: "repeat(auto-fit, minmax(180px, 1fr))",
+                  alignItems: "start",
                 }}
               >
                 <div>
-                  <p style={{ margin: 0, fontWeight: 700 }}>{row.username}</p>
-                  <p style={{ margin: "8px 0 0", opacity: 0.75, fontSize: "14px" }}>
-                    Pre: {row.prePercentage}% • Post: {row.postPercentage}%
+                  <p style={{ margin: 0, opacity: 0.75 }}>Average Pre-Assessment</p>
+                  <p style={{ margin: "8px 0 0", fontSize: "24px", fontWeight: 700 }}>
+                    {assessmentBreakdown.summary?.averagePrePercentage != null
+                      ? `${assessmentBreakdown.summary.averagePrePercentage}%`
+                      : "N/A"}
                   </p>
                 </div>
-                <div style={{ minWidth: "70px", textAlign: "right" }}>
-                  <div
-                    style={{
-                      fontSize: "24px",
-                      fontWeight: 800,
-                      color:
-                        row.changePercentage > 0
-                          ? "#22c55e"
-                          : row.changePercentage < 0
-                          ? "#ef4444"
-                          : "#fff",
-                    }}
-                  >
-                    {row.changePercentage > 0 ? "+" : ""}
-                    {row.changePercentage}%
-                  </div>
+                <div>
+                  <p style={{ margin: 0, opacity: 0.75 }}>Average Post-Assessment</p>
+                  <p style={{ margin: "8px 0 0", fontSize: "24px", fontWeight: 700 }}>
+                    {assessmentBreakdown.summary?.averagePostPercentage != null
+                      ? `${assessmentBreakdown.summary.averagePostPercentage}%`
+                      : "N/A"}
+                  </p>
+                </div>
+                <div>
+                  <p style={{ margin: 0, opacity: 0.75 }}>Average Change</p>
+                  <p style={{ margin: "8px 0 0", fontSize: "24px", fontWeight: 700 }}>
+                    {assessmentBreakdown.summary?.averageChangePercentage != null
+                      ? `${assessmentBreakdown.summary.averageChangePercentage > 0 ? "+" : ""}${assessmentBreakdown.summary.averageChangePercentage}%`
+                      : "N/A"}
+                  </p>
                 </div>
               </div>
-            ))
+
+              <button
+                type="button"
+                onClick={() => setShowIndividualBreakdown((prev) => !prev)}
+                style={{
+                  ...pageStyles.button,
+                  width: "fit-content",
+                  margin: "0 0 0 auto",
+                  alignSelf: "flex-end",
+                }}
+              >
+                {showIndividualBreakdown ? "Hide Individual Results" : "Show Individual Results"}
+              </button>
+
+              {showIndividualBreakdown && (
+                <>
+                  {assessmentBreakdown.rows.length === 0 ? (
+                    <p style={{ opacity: 0.75 }}>
+                      No assessment breakdown available for users with both pre and post results.
+                    </p>
+                  ) : (
+                    assessmentBreakdown.rows.map((row) => (
+                      <div
+                        key={row.username}
+                        style={{
+                          ...pageStyles.card,
+                          display: "flex",
+                          justifyContent: "space-between",
+                          alignItems: "center",
+                          gap: "12px",
+                        }}
+                      >
+                        <div>
+                          <p style={{ margin: 0, fontWeight: 700 }}>{row.username}</p>
+                          <p style={{ margin: "8px 0 0", opacity: 0.75, fontSize: "14px" }}>
+                            Pre: {row.prePercentage}% • Post: {row.postPercentage}%
+                          </p>
+                        </div>
+                        <div style={{ minWidth: "70px", textAlign: "right" }}>
+                          <div
+                            style={{
+                              fontSize: "24px",
+                              fontWeight: 800,
+                              color:
+                                row.changePercentage > 0
+                                  ? "#22c55e"
+                                  : row.changePercentage < 0
+                                  ? "#ef4444"
+                                  : "#fff",
+                            }}
+                          >
+                            {row.changePercentage > 0 ? "+" : ""}
+                            {row.changePercentage}%
+                          </div>
+                        </div>
+                      </div>
+                    ))
+                  )}
+                </>
+              )}
+            </>
           )}
         </div>
       </div>
