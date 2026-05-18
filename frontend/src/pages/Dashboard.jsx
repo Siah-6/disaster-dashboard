@@ -142,35 +142,35 @@ export default function Dashboard() {
                     <>
                       <div
                         style={{
-                          width: "100%",
-                          height: 220,
+                          width: "180px",
+                          minWidth: "180px",
+                          height: "180px",
+                          minHeight: "180px",
                           display: "flex",
                           justifyContent: "center",
                           position: "relative",
                         }}
                       >
-                        <ResponsiveContainer width="100%" height="100%">
-                          <PieChart>
-                            <Pie
-                              data={[
-                                { name: "Correct", value: stats.correct },
-                                { name: "Incorrect", value: stats.incorrect },
-                              ]}
-                              dataKey="value"
-                              outerRadius={70}
-                              innerRadius={45}
-                              labelLine={false}
-                            >
-                              {[
-                                { name: "Correct", value: stats.correct },
-                                { name: "Incorrect", value: stats.incorrect },
-                              ].map((entry, index) => (
-                                <Cell key={index} fill={COLORS[index]} />
-                              ))}
-                            </Pie>
-                            <Tooltip />
-                          </PieChart>
-                        </ResponsiveContainer>
+                        <PieChart width={180} height={180}>
+                          <Pie
+                            data={[
+                              { name: "Correct", value: stats.correct },
+                              { name: "Incorrect", value: stats.incorrect },
+                            ]}
+                            dataKey="value"
+                            outerRadius={70}
+                            innerRadius={45}
+                            labelLine={false}
+                          >
+                            {[
+                              { name: "Correct", value: stats.correct },
+                              { name: "Incorrect", value: stats.incorrect },
+                            ].map((entry, index) => (
+                              <Cell key={index} fill={COLORS[index]} />
+                            ))}
+                          </Pie>
+                          <Tooltip />
+                        </PieChart>
 
                         <div
                           style={{
