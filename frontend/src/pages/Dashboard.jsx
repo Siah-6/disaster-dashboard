@@ -83,6 +83,37 @@ export default function Dashboard() {
     return () => clearInterval(interval);
   }, []);
 
+  const simulations = Object.entries(grouped).flatMap(([location, disasters]) =>
+    Object.entries(disasters)
+      .map(([disaster, stats]) => {
+        const total = stats.correct + stats.incorrect;
+        return {
+          location,
+          disaster,
+          correct: stats.correct,
+          incorrect: stats.incorrect,
+          total,
+          accuracy: total ? stats.correct / total : 0,
+        };
+      })
+      .filter((sim) => sim.total > 0)
+  );
+
+  const totalCorrect = simulations.reduce((sum, sim) => sum + sim.correct, 0);
+  const totalIncorrect = simulations.reduce((sum, sim) => sum + sim.incorrect, 0);
+  const totalResponses = totalCorrect + totalIncorrect;
+  const averageAccuracy = totalResponses
+    ? Math.round((totalCorrect / totalResponses) * 100)
+    : 0;
+
+  const topErrorSimulations = [...simulations]
+    .sort((a, b) => b.incorrect - a.incorrect)
+    .slice(0, 5);
+
+  const topCorrectSimulations = [...simulations]
+    .sort((a, b) => b.correct - a.correct)
+    .slice(0, 5);
+
   if (loading) return <h1 style={{ textAlign: "center" }}>Loading...</h1>;
 
   return (
@@ -91,6 +122,110 @@ export default function Dashboard() {
       <p style={{ textAlign: "center", opacity: 0.7, marginBottom: "24px" }}>
         Last updated: {lastUpdated ? lastUpdated.toLocaleTimeString() : "—"}
       </p>
+
+      <div style={pageStyles.section}>
+        <h2 style={pageStyles.sectionTitle}>Overall Summary</h2>
+        <div
+          style={{
+            display: "grid",
+            gap: "16px",
+            gridTemplateColumns: "repeat(auto-fit, minmax(180px, 1fr))",
+          }}
+        >
+          <div style={pageStyles.card}>
+            <p style={{ margin: 0, opacity: 0.75 }}>Total Correct</p>
+            <p style={{ margin: "8px 0 0", fontSize: "24px", fontWeight: 700 }}>
+              {totalCorrect}
+            </p>
+          </div>
+          <div style={pageStyles.card}>
+            <p style={{ margin: 0, opacity: 0.75 }}>Total Incorrect</p>
+            <p style={{ margin: "8px 0 0", fontSize: "24px", fontWeight: 700 }}>
+              {totalIncorrect}
+            </p>
+          </div>
+          <div style={pageStyles.card}>
+            <p style={{ margin: 0, opacity: 0.75 }}>Total Responses</p>
+            <p style={{ margin: "8px 0 0", fontSize: "24px", fontWeight: 700 }}>
+              {totalResponses}
+            </p>
+          </div>
+          <div style={pageStyles.card}>
+            <p style={{ margin: 0, opacity: 0.75 }}>Average Accuracy</p>
+            <p style={{ margin: "8px 0 0", fontSize: "24px", fontWeight: 700 }}>
+              {averageAccuracy}%
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <div style={pageStyles.section}>
+        <h2 style={pageStyles.sectionTitle}>Top Simulations with Most Errors</h2>
+        <div style={{ display: "grid", gap: "12px" }}>
+          {topErrorSimulations.length === 0 ? (
+            <p style={{ opacity: 0.75 }}>No simulations with errors yet.</p>
+          ) : (
+            topErrorSimulations.map((sim) => (
+              <div
+                key={`${sim.location}-${sim.disaster}`}
+                style={{
+                  ...pageStyles.card,
+                  display: "flex",
+                  justifyContent: "space-between",
+                  alignItems: "center",
+                  gap: "12px",
+                }}
+              >
+                <div>
+                  <p style={{ margin: 0, fontWeight: 700 }}>
+                    {sim.location} / {sim.disaster}
+                  </p>
+                  <p style={{ margin: "6px 0 0", opacity: 0.75, fontSize: "14px" }}>
+                    Incorrect: {sim.incorrect} • Total: {sim.total}
+                  </p>
+                </div>
+                <span style={{ fontSize: "20px", fontWeight: 700, color: "#ef4444" }}>
+                  {sim.incorrect}
+                </span>
+              </div>
+            ))
+          )}
+        </div>
+      </div>
+
+      <div style={pageStyles.section}>
+        <h2 style={pageStyles.sectionTitle}>Top Correct Simulations</h2>
+        <div style={{ display: "grid", gap: "12px" }}>
+          {topCorrectSimulations.length === 0 ? (
+            <p style={{ opacity: 0.75 }}>No correct simulation data yet.</p>
+          ) : (
+            topCorrectSimulations.map((sim) => (
+              <div
+                key={`${sim.location}-${sim.disaster}`}
+                style={{
+                  ...pageStyles.card,
+                  display: "flex",
+                  justifyContent: "space-between",
+                  alignItems: "center",
+                  gap: "12px",
+                }}
+              >
+                <div>
+                  <p style={{ margin: 0, fontWeight: 700 }}>
+                    {sim.location} / {sim.disaster}
+                  </p>
+                  <p style={{ margin: "6px 0 0", opacity: 0.75, fontSize: "14px" }}>
+                    Correct: {sim.correct} • Total: {sim.total}
+                  </p>
+                </div>
+                <span style={{ fontSize: "20px", fontWeight: 700, color: "#22c55e" }}>
+                  {sim.correct}
+                </span>
+              </div>
+            ))
+          )}
+        </div>
+      </div>
 
       {Object.entries(grouped).map(([location, disasters]) => (
         <div key={location} style={pageStyles.section}>
