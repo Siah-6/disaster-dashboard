@@ -11,17 +11,17 @@ import { pageStyles } from "../styles/shared";
 
 const LOCATIONS = ["SCHOOL", "OFFICE", "HOUSE", "OUTDOOR"];
 const DISASTERS = ["FIRE", "FLOOD", "EARTHQUAKE"];
-const COLORS = ["#22c55e", "#ef4444"];
+const COLORS = ["#C3B0F9", "#5E4BAA"];
 
 const cardStyles = {
-  backgroundColor: "#1e293b",
-  border: "1px solid rgba(255,255,255,0.05)",
-  borderRadius: "16px",
+  backgroundColor: "#26415E",
+  border: "1px solid rgba(255,255,255,0.12)",
+  borderRadius: "18px",
   padding: "clamp(16px, 4vw, 20px) clamp(14px, 3vw, 18px)",
   width: "clamp(160px, 45vw, 220px)",
   minHeight: "clamp(280px, 70vw, 320px)",
   maxWidth: "100%",
-  boxShadow: "0 6px 18px rgba(0,0,0,0.25)",
+  boxShadow: "0 10px 24px rgba(16, 28, 50, 0.12)",
   textAlign: "center",
   display: "flex",
   flexDirection: "column",
@@ -29,6 +29,7 @@ const cardStyles = {
   justifyContent: "flex-start",
   transition: "all 0.2s ease",
   cursor: "pointer",
+  color: "#fff",
 };
 
 export default function Dashboard() {
@@ -216,7 +217,7 @@ export default function Dashboard() {
   return (
     <div style={pageStyles.wideContainer}>
       <h1 style={pageStyles.title}>Disaster Simulation Dashboard</h1>
-      <p style={{ textAlign: "center", opacity: 0.7, marginBottom: "24px" }}>
+      <p style={{ textAlign: "center", color: "#E8E8E8", marginBottom: "24px" }}>
         Last updated: {lastUpdated ? lastUpdated.toLocaleTimeString() : "—"}
       </p>
 
@@ -229,26 +230,26 @@ export default function Dashboard() {
             gridTemplateColumns: "repeat(auto-fit, minmax(180px, 1fr))",
           }}
         >
-          <div style={pageStyles.card}>
-            <p style={{ margin: 0, opacity: 0.75 }}>Total Correct</p>
+          <div style={pageStyles.summaryCard}>
+            <p style={{ margin: 0, color: "#E8E8E8" }}>Total Correct</p>
             <p style={{ margin: "8px 0 0", fontSize: "24px", fontWeight: 700 }}>
               {totalCorrect}
             </p>
           </div>
-          <div style={pageStyles.card}>
-            <p style={{ margin: 0, opacity: 0.75 }}>Total Incorrect</p>
+          <div style={pageStyles.summaryCard}>
+            <p style={{ margin: 0, color: "#E8E8E8" }}>Total Incorrect</p>
             <p style={{ margin: "8px 0 0", fontSize: "24px", fontWeight: 700 }}>
               {totalIncorrect}
             </p>
           </div>
-          <div style={pageStyles.card}>
-            <p style={{ margin: 0, opacity: 0.75 }}>Total Responses</p>
+          <div style={pageStyles.summaryCard}>
+            <p style={{ margin: 0, color: "#E8E8E8" }}>Total Responses</p>
             <p style={{ margin: "8px 0 0", fontSize: "24px", fontWeight: 700 }}>
               {totalResponses}
             </p>
           </div>
-          <div style={pageStyles.card}>
-            <p style={{ margin: 0, opacity: 0.75 }}>Average Accuracy</p>
+          <div style={pageStyles.summaryCard}>
+            <p style={{ margin: 0, color: "#E8E8E8" }}>Average Accuracy</p>
             <p style={{ margin: "8px 0 0", fontSize: "24px", fontWeight: 700 }}>
               {averageAccuracy}%
             </p>
@@ -260,7 +261,7 @@ export default function Dashboard() {
         <h2 style={pageStyles.sectionTitle}>Top Simulations with Most Errors</h2>
         <div style={{ display: "grid", gap: "12px" }}>
           {topErrorSimulations.length === 0 ? (
-            <p style={{ opacity: 0.75 }}>No simulations with errors yet.</p>
+            <p style={{ color: "#E8E8E8" }}>No simulations with errors yet.</p>
           ) : (
             topErrorSimulations.map((sim, index) => (
               <div
@@ -275,7 +276,7 @@ export default function Dashboard() {
               >
                 <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
                   <div style={{ width: "48px", flexShrink: 0, textAlign: "left" }}>
-                    <span style={{ fontSize: "18px", fontWeight: 800, color: "#fff", opacity: 0.95 }}>
+                    <span style={{ fontSize: "18px", fontWeight: 700, color: "#fff" }}>
                       #{index + 1}
                     </span>
                   </div>
@@ -283,7 +284,7 @@ export default function Dashboard() {
                     <p style={{ margin: 0, fontWeight: 700 }}>
                       {sim.location} / {sim.disaster}
                     </p>
-                    <p style={{ margin: "6px 0 0", opacity: 0.75, fontSize: "14px" }}>
+                    <p style={{ margin: "6px 0 0", color: "#E8E8E8", fontSize: "14px" }}>
                       Incorrect: {sim.incorrect} • Total: {sim.total}
                     </p>
                   </div>
@@ -301,7 +302,7 @@ export default function Dashboard() {
         <h2 style={pageStyles.sectionTitle}>Top Correct Simulations</h2>
         <div style={{ display: "grid", gap: "12px" }}>
           {topCorrectSimulations.length === 0 ? (
-            <p style={{ opacity: 0.75 }}>No correct simulation data yet.</p>
+            <p style={{ color: "#E8E8E8" }}>No correct simulation data yet.</p>
           ) : (
             topCorrectSimulations.map((sim, index) => (
               <div
@@ -316,7 +317,7 @@ export default function Dashboard() {
               >
                 <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
                   <div style={{ width: "48px", flexShrink: 0, textAlign: "left" }}>
-                    <span style={{ fontSize: "18px", fontWeight: 800, color: "#fff", opacity: 0.95 }}>
+                    <span style={{ fontSize: "18px", fontWeight: 700, color: "#fff" }}>
                       #{index + 1}
                     </span>
                   </div>
@@ -324,7 +325,7 @@ export default function Dashboard() {
                     <p style={{ margin: 0, fontWeight: 700 }}>
                       {sim.location} / {sim.disaster}
                     </p>
-                    <p style={{ margin: "6px 0 0", opacity: 0.75, fontSize: "14px" }}>
+                    <p style={{ margin: "6px 0 0", color: "#E8E8E8", fontSize: "14px" }}>
                       Correct: {sim.correct} • Total: {sim.total}
                     </p>
                   </div>
@@ -342,7 +343,7 @@ export default function Dashboard() {
         <h2 style={pageStyles.sectionTitle}>Assessment Breakdown</h2>
         <div style={{ display: "grid", gap: "16px" }}>
           {breakdownLoading ? (
-            <p style={{ opacity: 0.75 }}>Loading assessment breakdown...</p>
+            <p style={{ color: "#E8E8E8" }}>Loading assessment breakdown...</p>
           ) : (
             <>
               <div
@@ -355,7 +356,7 @@ export default function Dashboard() {
                 }}
               >
                 <div>
-                  <p style={{ margin: 0, opacity: 0.75 }}>Average Pre-Assessment</p>
+                  <p style={{ margin: 0, color: "#E8E8E8" }}>Average Pre-Assessment</p>
                   <p style={{ margin: "8px 0 0", fontSize: "24px", fontWeight: 700 }}>
                     {assessmentBreakdown.summary?.averagePrePercentage != null
                       ? `${assessmentBreakdown.summary.averagePrePercentage}%`
@@ -363,7 +364,7 @@ export default function Dashboard() {
                   </p>
                 </div>
                 <div>
-                  <p style={{ margin: 0, opacity: 0.75 }}>Average Post-Assessment</p>
+                  <p style={{ margin: 0, color: "#E8E8E8" }}>Average Post-Assessment</p>
                   <p style={{ margin: "8px 0 0", fontSize: "24px", fontWeight: 700 }}>
                     {assessmentBreakdown.summary?.averagePostPercentage != null
                       ? `${assessmentBreakdown.summary.averagePostPercentage}%`
@@ -371,7 +372,7 @@ export default function Dashboard() {
                   </p>
                 </div>
                 <div>
-                  <p style={{ margin: 0, opacity: 0.75 }}>Average Change</p>
+                  <p style={{ margin: 0, color: "#E8E8E8" }}>Average Change</p>
                   <p style={{ margin: "8px 0 0", fontSize: "24px", fontWeight: 700 }}>
                     {assessmentBreakdown.summary?.averageChangePercentage != null
                       ? `${assessmentBreakdown.summary.averageChangePercentage > 0 ? "+" : ""}${assessmentBreakdown.summary.averageChangePercentage}%`
@@ -396,7 +397,7 @@ export default function Dashboard() {
               {showIndividualBreakdown && (
                 <>
                   {assessmentBreakdown.rows.length === 0 ? (
-                    <p style={{ opacity: 0.75 }}>
+                    <p style={{ color: "#E8E8E8" }}>
                       No assessment breakdown available for users with both pre and post results.
                     </p>
                   ) : (
@@ -413,7 +414,7 @@ export default function Dashboard() {
                       >
                         <div>
                           <p style={{ margin: 0, fontWeight: 700 }}>{row.username}</p>
-                          <p style={{ margin: "8px 0 0", opacity: 0.75, fontSize: "14px" }}>
+                          <p style={{ margin: "8px 0 0", color: "#E8E8E8", fontSize: "14px" }}>
                             Pre: {row.prePercentage}% • Post: {row.postPercentage}%
                           </p>
                         </div>
@@ -472,20 +473,18 @@ export default function Dashboard() {
                   key={disaster}
                   style={cardStyles}
                   onMouseEnter={(e) => {
-                    e.currentTarget.style.transform = "scale(1.04)";
                     e.currentTarget.style.boxShadow =
-                      "0 10px 30px rgba(0,0,0,0.4)";
+                      "0 10px 24px rgba(45,47,98,0.12)";
                   }}
                   onMouseLeave={(e) => {
-                    e.currentTarget.style.transform = "scale(1)";
                     e.currentTarget.style.boxShadow =
-                      "0 6px 18px rgba(0,0,0,0.25)";
+                      "0 10px 24px rgba(45,47,98,0.12)";
                   }}
                 >
                   <h3
                     style={{
                       fontSize: "18px",
-                      fontWeight: "800",
+                      fontWeight: "600",
                       marginBottom: "16px",
                     }}
                   >
@@ -493,7 +492,7 @@ export default function Dashboard() {
                   </h3>
 
                   {total === 0 ? (
-                    <p style={{ opacity: 0.5, fontStyle: "italic" }}>
+                    <p style={{ color: "#E8E8E8", fontStyle: "italic" }}>
                       No data available
                     </p>
                   ) : (

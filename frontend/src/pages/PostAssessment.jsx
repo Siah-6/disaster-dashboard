@@ -144,13 +144,13 @@ export default function PostAssessment() {
     <div style={pageStyles.container}>
       <Toast message={toast} onClose={dismissToast} />
       <h1 style={pageStyles.title}>Post-Assessment</h1>
-      <p style={{ textAlign: "center", opacity: 0.7, marginBottom: "24px" }}>
+      <p style={{ textAlign: "center", color: "#E8E8E8", marginBottom: "24px" }}>
         Select your username, then answer all questions in order: Fire, Flood,
         then Earthquake.
       </p>
 
       {usernames.length === 0 ? (
-        <p style={{ textAlign: "center", opacity: 0.7 }}>
+        <p style={{ textAlign: "center", color: "#E8E8E8" }}>
           No users are eligible for the post-assessment. Complete a
           pre-assessment first.
         </p>
@@ -187,7 +187,7 @@ export default function PostAssessment() {
               ))}
             </select>
             {username && (
-              <p style={{ marginTop: "12px", opacity: 0.6, fontSize: "14px" }}>
+              <p style={{ marginTop: "12px", color: "#E8E8E8", fontSize: "14px" }}>
                 Progress: {answeredCount} / {totalQuestions} answered
               </p>
             )}
@@ -233,16 +233,15 @@ export default function PostAssessment() {
                                 display: "flex",
                                 alignItems: "flex-start",
                                 gap: "10px",
-                                padding: "10px 12px",
-                                borderRadius: "8px",
+                                padding: "12px 14px",
+                                borderRadius: "14px",
                                 cursor: canAnswer ? "pointer" : "default",
-                                opacity: canAnswer ? 1 : 0.5,
-                                backgroundColor: selected
-                                  ? "rgba(59, 130, 246, 0.2)"
-                                  : "rgba(255,255,255,0.03)",
+                                opacity: canAnswer ? 1 : 0.6,
+                                color: "#fff",
+                                backgroundColor: "#5E4D6F",
                                 border: selected
-                                  ? "1px solid #3b82f6"
-                                  : "1px solid rgba(255,255,255,0.06)",
+                                  ? "1px solid #8A6A92"
+                                  : "1px solid rgba(255,255,255,0.12)",
                               }}
                             >
                               <input
